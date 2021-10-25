@@ -59,7 +59,7 @@
     validate_certs: yes
     timeout: '{{ intellij_idea_download_timeout_seconds }}'
     mode: 'u=rw,go=r'
-  when: not stat_install_dir.stat.exists
+  when: not stat_install_dir.stat.exists is defined
 
 - name: create IntelliJ IDEA installation directory
   when: ansible_os_family != 'Darwin'
@@ -110,26 +110,26 @@
   file:
     path: ./tmp/
     state: directory
-  when: not stat_install_dir.stat.exists
+  when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
 
 - name: Mount dmg to tmp dir
   command: hdiutil attach '{{ intellij_download_dir }}/{{ intellij_redis_filename }}' -nobrowse -mountpoint ./tmp/{{ intellij_app_name }}
-  when: not stat_install_dir.stat.exists and ansible_os_family == 'Darwin'
+  when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
 
 - name: Copy app to Applications.
   shell: cp -aR ./tmp/{{ intellij_app_name }}/*.app /Applications/{{ intellij_app_name }}.app
-  when: not stat_install_dir.stat.exists and ansible_os_family == 'Darwin'
+  when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
 
 - name: Unmount dmg
   command: hdiutil detach ./tmp/{{ intellij_app_name }}/
-  when: not stat_install_dir.stat.exists and ansible_os_family == 'Darwin'
+  when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
 
 - name: Remove tmp mounting dir
   file:
     path: ./tmp/
     state: absent
     when: not stat_install_dir.stat.exists
-  when: not stat_install_dir.stat.exists and ansible_os_family == 'Darwin'
+  when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
 
 - name: install Ansible facts.d directory (Linux)
   become: yes
