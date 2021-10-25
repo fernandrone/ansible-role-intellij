@@ -107,7 +107,9 @@
 
 ## OSX
 - name: Create tmp dir as dmg mounting point;
-  command: mkdir -p ./tmp/
+  file:
+    path: ./tmp/
+    state: directory
   when: not stat_install_dir.stat.exists
 
 - name: Mount dmg to tmp dir
@@ -123,7 +125,10 @@
   when: not stat_install_dir.stat.exists and ansible_os_family == 'Darwin'
 
 - name: Remove tmp mounting dir
-  command: rm -R ./tmp/
+  file:
+    path: ./tmp/
+    state: absent
+    when: not stat_install_dir.stat.exists
   when: not stat_install_dir.stat.exists and ansible_os_family == 'Darwin'
 
 - name: install Ansible facts.d directory (Linux)
