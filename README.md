@@ -32,6 +32,7 @@ Requirements
 
             * 8
 
+    * OSX
     * Note: other versions are likely to work but have not been tested.
 
 * Java JDK
