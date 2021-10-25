@@ -2,8 +2,8 @@ Ansible Role: IntelliJ
 ======================
 
 [![Tests](https://github.com/gantsign/ansible-role-intellij/workflows/Tests/badge.svg)](https://github.com/gantsign/ansible-role-intellij/actions?query=workflow%3ATests)
-[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-gantsign.intellij-blue.svg)](https://galaxy.ansible.com/gantsign/intellij)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/gantsign/ansible-role-intellij/master/LICENSE)
+[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-gantsign.intellij-blue.svg)](https://galaxy.ansible.com/arnoutvw/intellij)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/arnoutvw/ansible-role-intellij/master/LICENSE)
 
 Role to download, install and configure the IntelliJ IDEA IDE
 [https://www.jetbrains.com/idea](https://www.jetbrains.com/idea).
