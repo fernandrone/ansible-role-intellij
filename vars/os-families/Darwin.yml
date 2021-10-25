@@ -1,0 +1,10 @@
+
+intellij_file_extension: ".dmg"
+intellij_install_dir: "/Applications"
+intellij_app_name: "IntelliJ IDEA"
+intellij_user_config_dir: "./Library/Application Support{{ (intellij_version is regex('^20[2-9][0-9]\\.')) | ternary('/JetBrains/' + intellij_user_dir, intellij_user_dir + '/config') }}"
+intellij_user_plugins_dir: "./Library/Application Support{{ (intellij_version is regex('^20[2-9][0-9]\\.')) | ternary('/JetBrains/' + intellij_user_dir + '/plugins', intellij_user_dir + '/config/plugins') }}"
+
+user_home_location: "/Users/"
+
+intellij_product_info_dir: '{{ intellij_install_dir }}/{{ intellij_app_name }}.app/Contents/Resources'

@@ -3,8 +3,8 @@
   become: yes
   intellij_install_plugin:
     plugin_manager_url: '{{ intellij_plugin_manager_url }}'
-    intellij_home: '{{ intellij_install_dir }}'
-    intellij_user_plugins_dir: '{{ intellij_user_plugins_dir }}'
+    intellij_home: '{{ intellij_product_info_dir }}'
+    intellij_user_plugins_dir: '{{ user_home_location }}{{ item.0.username }}/{{ intellij_user_plugins_dir }}'
     owner: '{{ item.0.username }}'
     group: '{{ item.0.intellij_group | default(item.0.username) }}'
     plugin_id: '{{ item.1 }}'
