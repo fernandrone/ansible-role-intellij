@@ -2,3 +2,4 @@
 # Dependencies for IntelliJ IDEA
 intellij_dependencies:
   - libcanberra-gtk-module
+intellij_file_extension: ".tar.gz"
