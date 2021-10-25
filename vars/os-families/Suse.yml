@@ -3,3 +3,5 @@
 intellij_dependencies:
   - libcanberra-gtk2-module
 intellij_file_extension: ".tar.gz"
+user_home_location: "/home/"
+intellij_product_info_dir: '{{ intellij_install_dir }}'
