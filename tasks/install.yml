@@ -109,6 +109,7 @@
 - name: Create tmp dir as dmg mounting point;
   file:
     path: ./tmp/
+    mode: 'u=rwx,go=rx'
     state: directory
   when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
 
