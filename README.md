@@ -32,7 +32,7 @@ Requirements
 
             * 8
 
-    * OSX
+    * macOS (Intel or M1)
     * Note: other versions are likely to work but have not been tested.
 
 * Java JDK

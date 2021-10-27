@@ -1,6 +1,7 @@
 ---
 - name: include OS family specific vars
   with_first_found:
+    - '../vars/os-families/{{ ansible_os_family }}-{{ ansible_machine }}.yml'
     - '../vars/os-families/{{ ansible_os_family }}.yml'
     - ../vars/os-families/default.yml
   include_vars: '{{ item }}'
@@ -15,6 +16,8 @@
 
 - name: load version vars
   with_first_found:
+    - '../vars/versions/{{ intellij_version }}-{{ ansible_os_family }}-{{ ansible_machine }}-{{ intellij_edition }}.yml'
+    - '../vars/versions/{{ intellij_version }}-{{ ansible_os_family }}-{{ intellij_edition }}.yml'
     - '../vars/versions/{{ intellij_version }}-{{ intellij_edition }}.yml'
     - ../vars/versions/default.yml
   include_vars: '{{ item }}'
@@ -31,6 +34,11 @@
     name: '{{ intellij_dependencies }}'
     state: present
 
+- name: install jmespath
+  become: yes
+  when: ansible_os_family == 'Darwin'
+  command: pip3 install jmespath
+
 - name: create download directory
   file:
     state: directory
@@ -38,16 +46,18 @@
     dest: '{{ intellij_download_dir }}'
 
 - name: stat install dir
-  when: ansible_os_family != 'Darwin'
   stat:
-    path: '{{ intellij_install_dir }}/bin'
+    path: '{{ intellij_product_info_dir }}'
   register: stat_install_dir
 
-- name: stat install dir
-  when: ansible_os_family == 'Darwin'
-  stat:
-    path: '{{ intellij_install_dir }}/{{ intellij_app_name }}.app'
-  register: stat_install_dir
+- name: Get intellij product json
+  when: (stat_install_dir.stat.exists is defined and stat_install_dir.stat.exists)
+  set_fact:
+    current_installed_version: "{{ lookup('file',intellij_product_info_dir + '/product-info.json') | from_json | json_query('version') }}"
+
+- name: Set should download new versionn
+  set_fact:
+    should_download_and_install: "{{ (not stat_install_dir.stat.exists is defined or not stat_install_dir.stat.exists) or current_installed_version != intellij_version }}"
 
 - name: download IntelliJ IDEA
   get_url:
@@ -59,7 +69,7 @@
     validate_certs: yes
     timeout: '{{ intellij_idea_download_timeout_seconds }}'
     mode: 'u=rw,go=r'
-  when: not stat_install_dir.stat.exists is defined
+  when: should_download_and_install
 
 - name: create IntelliJ IDEA installation directory
   when: ansible_os_family != 'Darwin'
@@ -111,26 +121,25 @@
     path: ./tmp/
     mode: 'u=rwx,go=rx'
     state: directory
-  when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
+  when: should_download_and_install and ansible_os_family == 'Darwin'
 
 - name: Mount dmg to tmp dir
-  command: hdiutil attach '{{ intellij_download_dir }}/{{ intellij_redis_filename }}' -nobrowse -mountpoint ./tmp/{{ intellij_app_name }}
-  when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
+  command: hdiutil attach '{{ intellij_download_dir }}/{{ intellij_redis_filename }}' -nobrowse -mountpoint ./tmp/idea
+  when: should_download_and_install and ansible_os_family == 'Darwin'
 
 - name: Copy app to Applications.
-  shell: cp -aR ./tmp/{{ intellij_app_name }}/*.app /Applications/{{ intellij_app_name }}.app
-  when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
+  shell: cp -aR "./tmp/idea/{{ intellij_app_name }}.app" "/Applications/{{ intellij_app_name }}.app"
+  when: should_download_and_install and ansible_os_family == 'Darwin'
 
 - name: Unmount dmg
-  command: hdiutil detach ./tmp/{{ intellij_app_name }}/
-  when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
+  command: hdiutil detach ./tmp/idea/
+  when: should_download_and_install and ansible_os_family == 'Darwin'
 
 - name: Remove tmp mounting dir
   file:
     path: ./tmp/
     state: absent
-    when: not stat_install_dir.stat.exists
-  when: not stat_install_dir.stat.exists is defined and ansible_os_family == 'Darwin'
+  when: should_download_and_install and ansible_os_family == 'Darwin'
 
 - name: install Ansible facts.d directory (Linux)
   become: yes
