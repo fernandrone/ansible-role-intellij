@@ -53,15 +53,15 @@
 - name: Get intellij product json
   when: (stat_install_dir.stat.exists is defined and stat_install_dir.stat.exists)
   set_fact:
-    current_installed_version: >
-    "{{ lookup('file',intellij_product_info_dir + '/product-info.json')
-      | from_json | json_query('version') }}"
+    current_installed_version: |
+      "{{ lookup('file',intellij_product_info_dir + '/product-info.json')"
+      "| from_json | json_query('version') }}"
 
 - name: Set should download new versionn
   set_fact:
-    should_download_and_install: >
-    "{{ (not stat_install_dir.stat.exists is defined or not stat_install_dir.stat.exists)
-      or current_installed_version != intellij_version }}"
+    should_download_and_install: |
+      "{{ (not stat_install_dir.stat.exists is defined or not stat_install_dir.stat.exists)"
+      " or current_installed_version != intellij_version }}"
 
 - name: download IntelliJ IDEA
   get_url:
