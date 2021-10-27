@@ -132,7 +132,10 @@
   when: should_download_and_install and ansible_os_family == 'Darwin'
 
 - name: Copy app to Applications.
-  shell: cp -aR "./tmp/idea/{{ intellij_app_name }}.app" "/Applications/{{ intellij_app_name }}.app"
+  copy:
+    remote_src: "./tmp/idea/{{ intellij_app_name }}.app"
+    dest: "/Applications/{{ intellij_app_name }}.app"
+    mode: preserve
   when: should_download_and_install and ansible_os_family == 'Darwin'
 
 - name: Unmount dmg
