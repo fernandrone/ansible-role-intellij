@@ -6,10 +6,10 @@
     - ../vars/os-families/default.yml
   include_vars: '{{ item }}'
 
-- name: assert edition vars
-  assert:
-    that:
-      - "intellij_edition in ('community', 'ultimate')"
+#- name: assert edition vars
+#  assert:
+#    that:
+#      - "intellij_edition in ('community', 'ultimate')"
 
 - name: load edition vars
   include_vars: '../vars/editions/{{ intellij_edition }}.yml'
