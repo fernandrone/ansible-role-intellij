@@ -65,7 +65,7 @@
     validate_certs: yes
     timeout: '{{ intellij_idea_download_timeout_seconds }}'
     mode: 'u=rw,go=r'
-  when: should_download_and_install == true
+  when: should_download_and_install | bool
 
 - name: create IntelliJ IDEA installation directory
   when: ansible_os_family != 'Darwin' and should_download_and_install
