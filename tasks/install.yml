@@ -42,8 +42,8 @@
 - name: Set should download new versionn
   set_fact:
     should_download_and_install: |
-      {{ (not stat_install_dir.stat.exists is defined or not stat_install_dir.stat.exists)
-       or (not current_installed_version is defined or current_installed_version != intellij_version) }}
+      {{ ((not stat_install_dir.stat.exists is defined or not stat_install_dir.stat.exists)
+       or (not current_installed_version is defined or current_installed_version != intellij_version)) | bool }}
 
 - name: display stat_install_dir
   debug: msg="{{ stat_install_dir }}"
@@ -65,10 +65,10 @@
     validate_certs: yes
     timeout: '{{ intellij_idea_download_timeout_seconds }}'
     mode: 'u=rw,go=r'
-  when: should_download_and_install | bool
+  when: should_download_and_install
 
 - name: create IntelliJ IDEA installation directory
-  when: ansible_os_family != 'Darwin'
+  when: ansible_os_family != 'Darwin' and should_download_and_install
   become: yes
   file:
     state: directory
@@ -79,7 +79,7 @@
 
 - name: install IntelliJ IDEA
   become: yes
-  when: ansible_os_family != 'Darwin'
+  when: ansible_os_family != 'Darwin' and should_download_and_install
   unarchive:
     src: '{{ intellij_download_dir }}/{{ intellij_redis_filename }}'
     remote_src: yes
@@ -91,7 +91,7 @@
     creates: '{{ intellij_install_dir }}/bin'
 
 - name: create bin link
-  when: ansible_os_family != 'Darwin'
+  when: ansible_os_family != 'Darwin' and should_download_and_install
   become: yes
   file:
     src: '{{ intellij_install_dir }}/bin/idea.sh'
@@ -103,7 +103,7 @@
 
 - name: install IntelliJ IDEA desktop file
   become: yes
-  when: ansible_os_family != 'Darwin'
+  when: ansible_os_family != 'Darwin' and should_download_and_install
   template:
     src: jetbrains-idea.desktop.j2
     dest: '/usr/share/applications/{{ intellij_desktop_filename }}'
