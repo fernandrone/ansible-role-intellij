@@ -37,7 +37,7 @@
   set_fact:
     current_installed_version: |
       {{ lookup('file',intellij_product_info_dir + '/product-info.json')
-       | from_json | json_query('version') }}
+       | from_json | json_query('version') | default('0.0.0') }}
 
 - name: Set should download new versionn
   set_fact:
