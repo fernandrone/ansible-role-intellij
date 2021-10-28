@@ -37,7 +37,7 @@
   set_fact:
     current_installed_version: |
       {{ lookup('file',intellij_product_info_dir + '/product-info.json')
-       | from_json | json_query('version') | default('0.0.0') }}
+       | from_json | json_query('version') }}
 
 - name: Set should download new versionn
   set_fact:
@@ -48,8 +48,8 @@
 - name: display stat_install_dir
   debug: msg="{{ stat_install_dir }}"
 
-- name: display current_installed_version
-  debug: msg="{{ current_installed_version }}"
+- name: display should_download_and_install
+  debug: msg="{{ should_download_and_install }}"
 
 - name: get sha from jetbrains
   set_fact:
