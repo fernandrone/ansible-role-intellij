@@ -45,6 +45,12 @@
       {{ (not stat_install_dir.stat.exists is defined or not stat_install_dir.stat.exists)
        or (not current_installed_version is defined or current_installed_version != intellij_version) }}
 
+- name: Display url
+  debug: msg="{{ intellij_mirror + '/' + intellij_redis_filename + '.sha256' }}"
+
+- name: Display url output
+  debug: msg="{{ lookup('url', intellij_mirror + '/' + intellij_redis_filename + '.sha256', split_lines=False) }}"
+
 - name: get sha from jetbrains
   set_fact:
     intellij_sha256sum: "{{ lookup('url', intellij_mirror + '/' + intellij_redis_filename + '.sha256', split_lines=False) | split(' ') }}"
