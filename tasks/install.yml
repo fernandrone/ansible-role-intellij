@@ -53,7 +53,7 @@
 
 - name: get sha from jetbrains
   set_fact:
-    intellij_sha256sum: "{{ lookup('url', intellij_mirror + '/' + intellij_redis_filename + '.sha256', split_lines=False) | split(' ') }}"
+    intellij_sha256sum: "{{ lookup('url', intellij_mirror + '/' + intellij_redis_filename + '.sha256', split_lines=False) | string | split(' ') }}"
 
 - name: download IntelliJ IDEA
   get_url:
