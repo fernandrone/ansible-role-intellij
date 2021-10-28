@@ -49,7 +49,7 @@
   debug: msg="{{ stat_install_dir }}"
 
 - name: display should_download_and_install
-  debug: msg="{{ should_download_and_install }}"
+  debug: msg="{{ should_download_and_install | bool }}"
 
 - name: get sha from jetbrains
   set_fact:
@@ -65,7 +65,7 @@
     validate_certs: yes
     timeout: '{{ intellij_idea_download_timeout_seconds }}'
     mode: 'u=rw,go=r'
-  when: should_download_and_install
+  when: should_download_and_install == true
 
 - name: create IntelliJ IDEA installation directory
   when: ansible_os_family != 'Darwin' and should_download_and_install
