@@ -21,14 +21,14 @@ jobs:
 
       matrix:
         ansible-version:
-          - '2.9.1'
+          - '2.10.7'
         molecule-scenario:
           - ultimate
           - rocky
           - opensuse
           - minimal
         include:
-          - ansible-version: '2.8.16'
+          - ansible-version: '2.10.7'
             molecule-scenario: default
 
     env:
@@ -41,7 +41,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.6'
+          python-version: '3.10.0'
 
       - name: Cache Molecule
         id: molecule-cache
