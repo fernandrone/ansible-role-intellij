@@ -5,7 +5,7 @@ galaxy_info:
   description: Role for installing the IntelliJ IDEA IDE.
   company: GantSign Ltd.
   license: MIT
-  min_ansible_version: 2.8
+  min_ansible_version: 2.10
   platforms:
     - name: EL
       versions:
@@ -14,6 +14,10 @@ galaxy_info:
       versions:
         - bionic
         - focal
+    - name: macOS
+      versions:
+        - Big-Sur
+        - High-Sierra
   galaxy_tags:
     - development
     - ide
