@@ -6,10 +6,10 @@
     - ../vars/os-families/default.yml
   include_vars: '{{ item }}'
 
-#- name: assert edition vars
-#  assert:
-#    that:
-#      - "intellij_edition in ('community', 'ultimate')"
+- name: assert edition vars
+  assert:
+    that:
+      - "intellij_edition in ('community', 'ultimate')"
 
 - name: load edition vars
   include_vars: '../vars/editions/{{ intellij_edition }}.yml'
@@ -32,21 +32,24 @@
     path: '{{ intellij_product_info_dir }}'
   register: stat_install_dir
 
+- name: Get intellij product json (default)
+  set_fact:
+    installed_version: "0.0.0"
+
+- name: "Get intellij product json content"
+  when: (stat_install_dir.stat.exists is defined and stat_install_dir.stat.exists)
+  ansible.builtin.slurp:
+    src: "{{ intellij_product_info_dir }}/product-info.json"
+  register: project_json_data
+
 - name: Get intellij product json
   when: (stat_install_dir.stat.exists is defined and stat_install_dir.stat.exists)
   set_fact:
-    current_installed_version: |
-      {{ lookup('file',intellij_product_info_dir + '/product-info.json')
-       | from_json | json_query('version') }}
-
-- name: Get intellij product json (fallback)
-  when: (not stat_install_dir.stat.exists is defined or not stat_install_dir.stat.exists)
-  set_fact:
-    current_installed_version: "0.0.0"
+    installed_version: "{{ project_json_data['content'] | b64decode | from_json }}"
 
 - name: Set should download new versionn
   set_fact:
-    should_download_and_install: "{{ not stat_install_dir.stat.exists or current_installed_version != intellij_version }}"
+    should_download_and_install: "{{ not stat_install_dir.stat.exists or installed_version.version != intellij_version }}"
 
 - name: get sha from jetbrains
   set_fact:
