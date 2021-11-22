@@ -34,12 +34,12 @@
 
 - name: Get intellij product json (default)
   set_fact:
-    installed_version: "0.0.0"
+    installed_version: '0.0.0'
 
-- name: "Get intellij product json content"
+- name: 'Get intellij product json content'
   when: (stat_install_dir.stat.exists is defined and stat_install_dir.stat.exists)
   ansible.builtin.slurp:
-    src: "{{ intellij_product_info_dir }}/product-info.json"
+    src: '{{ intellij_product_info_dir }}/product-info.json'
   register: project_json_data
 
 - name: Get intellij product json
@@ -49,7 +49,7 @@
 
 - name: Set should download new versionn
   set_fact:
-    should_download_and_install: "{{ not stat_install_dir.stat.exists or installed_version.version != intellij_version }}"
+    should_download_and_install: '{{ not stat_install_dir.stat.exists or (installed_version.version != intellij_version and intellij_force) }}'
 
 - name: get sha from jetbrains
   set_fact:
@@ -76,6 +76,12 @@
     group: root
     mode: 'u=rwx,go=rx'
     dest: '{{ intellij_install_dir }}'
+
+- name: Remove previous installation
+  file:
+    path: '/{{ intellij_install_dir }}/{{ intellij_app_name }}.app'
+    state: absent
+  when: ansible_os_family == 'Darwin' and should_download_and_install
 
 - name: install IntelliJ IDEA
   become: yes
@@ -123,23 +129,28 @@
   command: hdiutil attach '{{ intellij_download_dir }}/{{ intellij_redis_filename }}' -nobrowse -mountpoint ./tmp/idea
   when: should_download_and_install and ansible_os_family == 'Darwin'
 
-- name: Copy app to Applications.
-  copy:
-    src: "./tmp/idea/{{ intellij_app_name }}.app"
-    remote_src: yes
-    dest: "/Applications/{{ intellij_app_name }}.app"
-    mode: preserve
-  when: should_download_and_install and ansible_os_family == 'Darwin'
+- name: Attempt to copy application and gracefully unmount dmg
+  block:
+    - name: Copy app to {{ intellij_install_dir }}.
+      synchronize:
+        src: './tmp/idea/{{ intellij_app_name | replace(" ", "\ ") }}.app'
+        dest: '{{ intellij_install_dir | replace(" ", "\ ") }}'
+        recursive: yes
+        delete: yes
+        rsync_opts:
+          - '--protect-args'
+      when: should_download_and_install and ansible_os_family == 'Darwin'
 
-- name: Unmount dmg
-  command: hdiutil detach ./tmp/idea/
-  when: should_download_and_install and ansible_os_family == 'Darwin'
+  always:
+    - name: Unmount dmg
+      command: hdiutil detach ./tmp/idea/
+      when: should_download_and_install and ansible_os_family == 'Darwin'
 
-- name: Remove tmp mounting dir
-  file:
-    path: ./tmp/
-    state: absent
-  when: should_download_and_install and ansible_os_family == 'Darwin'
+    - name: Remove tmp mounting dir
+      file:
+        path: ./tmp/
+        state: absent
+      when: should_download_and_install and ansible_os_family == 'Darwin'
 
 - name: install Ansible facts.d directory (Linux)
   become: yes
