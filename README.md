@@ -2,7 +2,7 @@ Ansible Role: IntelliJ
 ======================
 
 [![Tests](https://github.com/gantsign/ansible-role-intellij/workflows/Tests/badge.svg)](https://github.com/gantsign/ansible-role-intellij/actions?query=workflow%3ATests)
-[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-gantsign.intellij-blue.svg)](https://galaxy.ansible.com/gantsign/intellij)
+[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-fernandrone.intellij-blue.svg)](https://galaxy.ansible.com/gantsign/intellij)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/gantsign/ansible-role-intellij/master/LICENSE)
 
 Role to download, install and configure the IntelliJ IDEA IDE
@@ -10,7 +10,7 @@ Role to download, install and configure the IntelliJ IDEA IDE
 
 While this role can install IntelliJ plugins, if you want to conditionally
 install particular plugins take a look at our companion role:
-[gantsign.intellij-plugins](https://galaxy.ansible.com/gantsign/intellij-plugins).
+[fernandrone.intellij-plugins](https://galaxy.ansible.com/gantsign/intellij-plugins).
 
 Requirements
 ------------
@@ -71,6 +71,10 @@ intellij_mirror: 'http://download.jetbrains.com/idea'
 
 # Edition to install (community or ultimate)
 intellij_edition: community
+
+# Set to 'false' so it skips the installation of Intellij IDEA in case it is
+# already installed (even if a different version than requested)
+intellij_force: true
 
 # Base installation directory for any IntelliJ IDEA distribution
 intellij_install_dir: /opt/idea/idea-{{ intellij_edition }}-{{ intellij_version }}
@@ -282,7 +286,7 @@ Minimal playbook:
 ```yaml
 - hosts: servers
   roles:
-    - role: gantsign.intellij
+    - role: fernandrone.intellij
 ```
 
 Playbook with user specific configuration (Default JDK, Maven, disabled plugins
@@ -291,7 +295,7 @@ and code style):
 ```yaml
 - hosts: servers
   roles:
-    - role: gantsign.intellij
+    - role: fernandrone.intellij
       intellij_default_maven_home: '/opt/maven/apache-maven-3.3.9'
       users:
         - username: vagrant
