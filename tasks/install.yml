@@ -1,10 +1,10 @@
 ---
 - name: include OS family specific vars
   with_first_found:
-    - '../vars/os-families/{{ ansible_os_family }}-{{ ansible_machine }}.yml'
-    - '../vars/os-families/{{ ansible_os_family }}.yml'
+    - "../vars/os-families/{{ ansible_os_family }}-{{ ansible_machine }}.yml"
+    - "../vars/os-families/{{ ansible_os_family }}.yml"
     - ../vars/os-families/default.yml
-  include_vars: '{{ item }}'
+  include_vars: "{{ item }}"
 
 - name: assert edition vars
   assert:
@@ -12,34 +12,34 @@
       - "intellij_edition in ('community', 'ultimate')"
 
 - name: load edition vars
-  include_vars: '../vars/editions/{{ intellij_edition }}.yml'
+  include_vars: "../vars/editions/{{ intellij_edition }}.yml"
 
 - name: install dependencies
   become: yes
   when: ansible_os_family != 'Darwin'
   package:
-    name: '{{ intellij_dependencies }}'
+    name: "{{ intellij_dependencies }}"
     state: present
 
 - name: create download directory
   file:
     state: directory
-    mode: 'u=rwx,go=rx'
-    dest: '{{ intellij_download_dir }}'
+    mode: "u=rwx,go=rx"
+    dest: "{{ intellij_download_dir }}"
 
 - name: stat install dir
   stat:
-    path: '{{ intellij_product_info_dir }}'
+    path: "{{ intellij_product_info_dir }}"
   register: stat_install_dir
 
 - name: Get intellij product json (default)
   set_fact:
-    installed_version: '0.0.0'
+    installed_version: "0.0.0"
 
-- name: 'Get intellij product json content'
+- name: "Get intellij product json content"
   when: (stat_install_dir.stat.exists is defined and stat_install_dir.stat.exists)
   ansible.builtin.slurp:
-    src: '{{ intellij_product_info_dir }}/product-info.json'
+    src: "{{ intellij_product_info_dir }}/product-info.json"
   register: project_json_data
 
 - name: Get intellij product json
@@ -49,7 +49,7 @@
 
 - name: Set should download new versionn
   set_fact:
-    should_download_and_install: '{{ not stat_install_dir.stat.exists or (installed_version.version != intellij_version and intellij_force) }}'
+    should_download_and_install: "{{ not stat_install_dir.stat.exists or (installed_version.version != intellij_version and intellij_force) }}"
 
 - name: get sha from jetbrains
   set_fact:
@@ -57,14 +57,14 @@
 
 - name: download IntelliJ IDEA
   get_url:
-    url: '{{ intellij_mirror }}/{{ intellij_redis_filename }}'
-    dest: '{{ intellij_download_dir }}/{{ intellij_redis_filename }}'
-    checksum: 'sha256:{{ intellij_sha256sum[:64] }}'
+    url: "{{ intellij_mirror }}/{{ intellij_redis_filename }}"
+    dest: "{{ intellij_download_dir }}/{{ intellij_redis_filename }}"
+    checksum: "sha256:{{ intellij_sha256sum[:64] }}"
     force: no
     use_proxy: yes
     validate_certs: yes
-    timeout: '{{ intellij_idea_download_timeout_seconds }}'
-    mode: 'u=rw,go=r'
+    timeout: "{{ intellij_idea_download_timeout_seconds }}"
+    mode: "u=rw,go=r"
   when: should_download_and_install | bool
 
 - name: create IntelliJ IDEA installation directory
@@ -74,12 +74,12 @@
     state: directory
     owner: root
     group: root
-    mode: 'u=rwx,go=rx'
-    dest: '{{ intellij_install_dir }}'
+    mode: "u=rwx,go=rx"
+    dest: "{{ intellij_install_dir }}"
 
 - name: Remove previous installation
   file:
-    path: '/{{ intellij_install_dir }}/{{ intellij_app_name }}.app'
+    path: "/{{ intellij_install_dir }}/{{ intellij_app_name }}.app"
     state: absent
   when: ansible_os_family == 'Darwin' and should_download_and_install
 
@@ -87,41 +87,41 @@
   become: yes
   when: ansible_os_family != 'Darwin' and should_download_and_install
   unarchive:
-    src: '{{ intellij_download_dir }}/{{ intellij_redis_filename }}'
+    src: "{{ intellij_download_dir }}/{{ intellij_redis_filename }}"
     remote_src: yes
-    extra_opts: '--strip-components=1'
-    dest: '{{ intellij_install_dir }}'
+    extra_opts: "--strip-components=1"
+    dest: "{{ intellij_install_dir }}"
     owner: root
     group: root
-    mode: 'o-w'
-    creates: '{{ intellij_install_dir }}/bin'
+    mode: "o-w"
+    creates: "{{ intellij_install_dir }}/bin"
 
 - name: create bin link
   when: ansible_os_family != 'Darwin' and should_download_and_install
   become: yes
   file:
-    src: '{{ intellij_install_dir }}/bin/idea.sh'
+    src: "{{ intellij_install_dir }}/bin/idea.sh"
     dest: /usr/local/bin/idea
     state: link
     owner: root
     group: root
-    mode: 'u=rwx,go=rx'
+    mode: "u=rwx,go=rx"
 
 - name: install IntelliJ IDEA desktop file
   become: yes
   when: ansible_os_family != 'Darwin' and should_download_and_install
   template:
     src: jetbrains-idea.desktop.j2
-    dest: '/usr/share/applications/{{ intellij_desktop_filename }}'
+    dest: "/usr/share/applications/{{ intellij_desktop_filename }}"
     owner: root
     group: root
-    mode: 'u=rw,go=r'
+    mode: "u=rw,go=r"
 
 ## OSX
 - name: Create tmp dir as dmg mounting point;
   file:
     path: ./tmp/
-    mode: 'u=rwx,go=rx'
+    mode: "u=rwx,go=rx"
     state: directory
   when: should_download_and_install and ansible_os_family == 'Darwin'
 
@@ -138,7 +138,9 @@
         recursive: yes
         delete: yes
         rsync_opts:
-          - '--protect-args'
+          - "--protect-args"
+          - "--rsync-path=/usr/local/bin/rsync"
+      delegate_to: "{{ inventory_hostname }}"
       when: should_download_and_install and ansible_os_family == 'Darwin'
 
   always:
@@ -160,7 +162,7 @@
     dest: /etc/ansible/facts.d
     owner: root
     group: root
-    mode: 'u=rwx,go=rx'
+    mode: "u=rwx,go=rx"
 
 - name: install IntelliJ facts (Linux)
   become: yes
@@ -170,7 +172,7 @@
     dest: /etc/ansible/facts.d/intellij.fact
     owner: root
     group: root
-    mode: 'u=rw,go=r'
+    mode: "u=rw,go=r"
 
 - name: install Ansible facts.d directory (OSX)
   become: yes
@@ -180,7 +182,7 @@
     dest: /etc/ansible/facts.d
     owner: root
     group: wheel
-    mode: 'u=rwx,go=rx'
+    mode: "u=rwx,go=rx"
 
 - name: install IntelliJ facts (OSX)
   become: yes
@@ -190,7 +192,7 @@
     dest: /etc/ansible/facts.d/intellij.fact
     owner: root
     group: wheel
-    mode: 'u=rw,go=r'
+    mode: "u=rw,go=r"
 
 - name: re-read facts
   setup: filter=ansible_local
